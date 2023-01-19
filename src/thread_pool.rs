@@ -6,7 +6,9 @@ pub struct ThreadPool {
     task_sender: Sender<Box<dyn FnOnce() + Send>>,
 }
 
+/// 一个线程池实现.
 impl ThreadPool {
+    /// 创建线程池的同时会创建相应数量的线程.
     pub fn new(size: usize) -> ThreadPool {
         let mut threads: Vec<thread::JoinHandle<()>> = Vec::with_capacity(size);
 
@@ -30,6 +32,7 @@ impl ThreadPool {
         }
     }
 
+    /// 调用时, 如果有空闲线程, 提交任务后立即返回, 反之阻塞直到有空闲线程.
     pub fn spawn<T: FnOnce() + Send + 'static>(&self, task: T) {
         let task = Box::new(task);
 
@@ -38,6 +41,7 @@ impl ThreadPool {
             .unwrap();
     }
 
+    /// 等待线程池内所有线程的任务执行完毕, 并销毁线程池内的所有线程.
     pub fn join(self) {
         drop(self.task_sender);
 
